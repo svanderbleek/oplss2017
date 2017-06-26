@@ -1,0 +1,24 @@
+
+Code you need to look at:
+
+var/ -- implementation of "temp"oraries/names, used to implement variables and labels.
+        the only file you should need to look at is temp.sig
+        the modules Label and Variable have signature TEMP
+
+labT/ -- abstract syntax of Godel's T with labeled sums and prodcts
+         the only file you should need to look at is labt.sig
+
+sem/ -- implementation of the static and dynamic semantics
+        your work goes in typechecker.sml and dynamics.sml
+        these implement the signatures in the corresponding .sig files
+
+cmlib/ -- general SML library
+          see Dict.sig and Set.sig for dictionary and set operations
+
+
+Library code (no need to read): 
+
+parser/ -- parsing strings into abstract syntax trees
+bind/   -- converting ASTs to ABTs
+top/ -- utilites for making the interactive top level and test harness
+

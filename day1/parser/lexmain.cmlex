@@ -1,0 +1,63 @@
+name LexMainFun
+alphabet 128
+
+set alpha = (range 'a 'z 'A 'Z)
+set digit = (range '0 '9)
+set alphanumeric = (| alpha digit '_ '')
+set white = (| 32 9 10 12 13)  /* space, tab, lf, ff, cr */
+set stringchar = (~ '" '\)
+
+function lexmain : t =
+   eos => eof
+   (+ white) => skip
+   (seq alpha (* alphanumeric)) => ident
+   (seq (? '~) (+ digit)) => number
+   '< => langle
+   '> => rangle
+   '{ => lbrace
+   '} => rbrace
+   '[ => lbracket
+   '] => rbracket
+   '( => lparen
+   ') => rparen
+   '& => ampersand
+   "->" => arrow
+   ":=" => assign
+   '@ => at
+   '| => bar
+   ': => colon
+   ', => comma
+   "=>" => darrow
+   '. => dot
+   '= => equal
+   "<-" => larrow
+   '+ => plus
+   '* => star
+   '_ => underscore
+   "(*" => begin_comment
+   epsilon => error
+
+function lexcomment : u =
+   "(*" => comment_open
+   "*)" => comment_close
+   any => comment_skip
+   epsilon => comment_error
+
+function lexstring : v =
+   '" => string_end
+   (+ stringchar) => string_stuff
+   "\a" => bs_a
+   "\b" => bs_b
+   "\t" => bs_t
+   "\n" => bs_n
+   "\v" => bs_v
+   "\f" => bs_f
+   "\r" => bs_r
+   "\\" => bs_bs
+   '\ => string_format
+   epsilon => string_error
+
+function lexformat : w =
+   '\ => format_end
+   (+ white) => format_skip
+   epsilon => format_error

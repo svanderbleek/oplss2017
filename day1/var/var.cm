@@ -1,0 +1,11 @@
+Group 
+  structure Variable
+  structure Label
+  signature TEMP
+  structure Temp
+is
+  ../cmlib/cmlib.cm
+  var.sml
+  temp.sig
+  temp.sml
+  label.sml

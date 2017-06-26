@@ -1,0 +1,11 @@
+Group
+  signature BIND
+  structure Bind
+is
+  ../cmlib/cmlib.cm
+  ../var/var.cm
+  ../labT/abt.cm
+  ../parser/parser.cm
+  bind.sml
+  bind.sig
+

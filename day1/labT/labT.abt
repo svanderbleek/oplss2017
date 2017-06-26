@@ -1,0 +1,18 @@
+symbol label
+
+abt typ =
+| Nat
+| Arrow of typ * typ
+| Prod of (label * typ) list
+| Sum of (label * typ) list
+
+sort term =
+| Z
+| S of term
+| Lam of (term binding * typ) . term
+| Ap of term * term
+| Pair of (label * term) list
+| Proj of (term * label)
+| Inj of typ * label * term
+| Case of term * (label * term binding . term) list
+| Iter of term * term * (term binding . term binding . term)

@@ -1,0 +1,11 @@
+Group
+  signature LABT
+  structure LabT
+is
+  ../cmlib/cmlib.cm
+  ../var/var.cm
+  abt.sig
+  abt.sml
+  labT.sig
+  labT.sml
+

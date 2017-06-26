@@ -1,0 +1,208 @@
+name ParseMainFun
+
+terminal IDENT of string
+terminal NUMBER of int
+terminal STRING of string
+terminal LANGLE
+terminal RANGLE
+terminal LBRACE
+terminal RBRACE
+terminal LBRACKET
+terminal RBRACKET
+terminal LPAREN
+terminal RPAREN
+terminal AMPERSAND precr 5
+terminal ARROW precr 2
+terminal ASSIGN
+terminal AT
+terminal BAR
+terminal COLON
+terminal COMMA
+terminal DARROW
+terminal DOT
+terminal EQUAL
+terminal LARROW
+terminal PLUS precr 3
+terminal STAR precr 4
+terminal UNDERSCORE
+terminal ABORT
+terminal BND
+terminal CASE
+terminal CMD precr 6
+terminal DCL
+terminal DO
+terminal ELSE
+terminal END
+terminal FIX
+terminal FN
+terminal FOLD
+terminal IF
+terminal IFNIL
+terminal IFZ
+terminal IN
+terminal INL
+terminal INR
+terminal IS
+terminal L
+terminal LET
+terminal LIST precr 6
+terminal MATCH
+terminal MU
+terminal NAT
+terminal NUM
+terminal PROC
+terminal R
+terminal REF precr 6
+terminal RET
+terminal S
+terminal THEN
+terminal TOP
+terminal UNFOLD
+terminal UNIT
+terminal VAL
+terminal VOID
+terminal WHILE
+terminal Z
+terminal EVAL
+terminal LOAD
+terminal STEP
+terminal USE
+terminal ITER
+terminal WITH
+
+nonterminal Record : record =
+   1:IDENT COLON COLON 2:Tp => record_only
+
+nonterminal RecordList : recordlist =
+   1:Record => record_one
+   1:Record COMMA 2:RecordList => record_cons
+
+nonterminal Tp : tp =
+   LPAREN 1:Tp RPAREN => tp_id
+   IDENT => tp_ident
+   NAT => tp_nat
+   UNIT => tp_unit
+   VOID => tp_void
+   LANGLE RANGLE => tp_record_emp
+   LANGLE 1:RecordList RANGLE => tp_record
+   LBRACKET RBRACKET => tp_plus_emp
+   LBRACKET 1:RecordList RBRACKET => tp_plus
+   1:Tp ARROW 2:Tp => tp_arrow
+   MU 1:IDENT DOT 2:Tp => tp_mu  precr 1
+   REF 1:Tp => tp_ref
+
+
+nonterminal Pred : pred =
+   LPAREN 1:Pred RPAREN => pred_id
+   TOP => pred_top
+   NUM => pred_num
+   1:Pred AMPERSAND 2:Pred => pred_and
+   1:Pred STAR 2:Pred => pred_times
+   1:Pred ARROW 2:Pred => pred_arrow
+   LIST 1:Pred => pred_list
+
+nonterminal PairList : pairlist = 
+   1:IDENT EQUAL 2:Exp => pair_one
+   1:IDENT EQUAL 2:Exp COMMA 3:PairList => pair_cons
+
+nonterminal ExpAtom : exp =
+   LPAREN 1:Exp RPAREN => exp_id
+   1:IDENT => exp_ident
+   1:NUMBER => exp_number
+   Z => exp_z
+   LANGLE RANGLE => exp_unit
+   LANGLE 1:PairList RANGLE => exp_pair
+   LET 1:Edecls IN 2:Exp END => exp_let
+/*
+   MATCH 1:Exp LBRACE 2:Rules RBRACE => exp_match
+   MATCH 1:Exp LBRACE BAR 2:Rules RBRACE => exp_match
+*/
+   ITER 1:Exp LBRACE 2:Exp BAR S 3:IDENT WITH 4:IDENT DARROW 5:Exp RBRACE => exp_iter 
+   ITER 1:Exp LBRACE 2:Exp BAR S LPAREN 3:IDENT RPAREN WITH 4:IDENT DARROW 5:Exp RBRACE => exp_iter 
+   CASE 1:Exp LBRACE 2:CaseRules RBRACE => exp_case
+   CASE 1:Exp LBRACE BAR 2:CaseRules RBRACE => exp_case
+   IFZ 1:Exp LBRACE Z DARROW 2:Exp BAR S 3:IDENT DARROW 4:Exp RBRACE => exp_ifz
+   IFZ 1:Exp LBRACE BAR Z DARROW 2:Exp BAR S 3:IDENT DARROW 4:Exp RBRACE => exp_ifz
+
+nonterminal ExpApp : exp =
+   1:ExpAtom => exp_id
+   1:ExpApp 2:ExpAtom => exp_app
+   S 1:ExpAtom => exp_s
+   ABORT LBRACKET 1:Tp RBRACKET 2:ExpAtom => exp_abort
+   IN 1:Tp LBRACE 2:IDENT RBRACE 3:ExpAtom => exp_in
+   UNFOLD 1:ExpAtom => exp_unfold
+
+nonterminal ExpPost : exp =
+   1:ExpApp => exp_id
+   1:ExpPost DOT 2:IDENT => exp_out
+
+nonterminal Exp : exp =
+   1:ExpPost => exp_id
+   FN LPAREN 1:IDENT COLON 2:Tp RPAREN 3:Exp => exp_fn
+   FN LPAREN 1:IDENT RPAREN 2:Exp => exp_fn_inf
+/*
+   PROC LPAREN 1:IDENT COLON 2:Tp RPAREN 3:Cmd => exp_proc
+*/
+   FIX 1:IDENT COLON 2:Tp IS 3:Exp => exp_fix
+   FIX 1:IDENT IS 2:Exp => exp_fix_inf
+   FOLD LBRACKET 1:IDENT DOT 2:Tp RBRACKET 3:Exp => exp_fold
+/*
+   CMD 1:Cmd => exp_cmd
+   AMPERSAND 1:IDENT => exp_addr
+*/
+
+nonterminal Edecls : edecls =
+   1:Edecl => edecls_one
+   1:Edecl 2:Edecls => edecls_cons
+
+nonterminal Edecl : edecl =
+   VAL 1:Pat EQUAL 2:Exp => edecl_val
+   VAL 1:IDENT COLON 2:Pred EQUAL 3:Exp => edecl_val_pred
+
+nonterminal CaseRule : caserule =
+   1:IDENT 2:Pat DARROW 3:Exp => case_only
+
+nonterminal CaseRules : caserules = 
+   1:CaseRule => case_one
+   1:CaseRule BAR 2:CaseRules => case_cons
+
+nonterminal Pat : pat =
+   LPAREN 1:Pat RPAREN => pat_id
+   UNDERSCORE COLON 1:Tp => pat_wild
+   1:IDENT COLON 2:Tp => pat_ident
+   1:IDENT => pat_ident_notp
+   1:Pat AT 2:IDENT => pat_alias
+   LANGLE RANGLE => pat_unit
+   LANGLE 1:PatList RANGLE => pat_pair
+
+nonterminal RecordPat : recordpat = 
+   1:IDENT EQUAL 2:Pat => recordpat_only
+
+nonterminal PatList : patlist = 
+   1:RecordPat => patlist_one
+   1:RecordPat COMMA 2:PatList => patlist_cons
+
+/*
+nonterminal Cmd : cmd =
+   LPAREN 1:Cmd RPAREN => cmd_id
+   RET 1:Exp => cmd_ret
+   BND 1:IDENT LARROW 2:Exp COMMA 3:Cmd => cmd_bnd
+   DCL 1:IDENT ASSIGN 2:Exp IN 3:Cmd => cmd_dcl
+   AT 1:IDENT => cmd_get
+   1:IDENT ASSIGN 2:Exp => cmd_assign
+   STAR 1:IDENT => cmd_getref
+   LET 1:Mdecls IN 2:Cmd END => cmd_let
+   1:Exp 2:Exp => cmd_app
+   DO 1:Exp => cmd_do
+...
+*/
+
+nonterminal Directive : directive =
+   STEP => directive_step0
+   STEP 1:Exp => directive_step
+   EVAL => directive_eval0
+   EVAL 1:Exp => directive_eval
+   LOAD 1:Exp => directive_load
+   USE 1:STRING => directive_use
+
+start Directive

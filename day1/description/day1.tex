@@ -1,0 +1,1101 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{latexsym}
+\usepackage{verbatim}
+\usepackage{code,proof,amsthm,amssymb,amsmath,stmaryrd,tipa}
+\usepackage{ifthen}
+\usepackage{graphics}
+\usepackage{mathpartir}
+\usepackage{hyperref}
+\usepackage{times}
+\usepackage{url}
+
+\newcommand\sml[1]{\texttt{#1}}
+
+%% Question macros
+\newcounter{question}[section]
+\newcounter{extracredit}[section]
+\newcounter{totalPoints}
+\setcounter{totalPoints}{0}
+\newcommand{\question}[1]
+{
+\bigskip
+\addtocounter{question}{1}
+\addtocounter{totalPoints}{#1}
+\noindent
+{\textbf{Task \thesection.\thequestion}}[#1 points]:
+
+
+}
+\newcommand{\ecquestion}
+{
+\bigskip
+\addtocounter{extracredit}{1}
+\noindent
+\textbf{Extra Credit \thesection.\theextracredit}:}
+
+%% Set to "false" to generate the problem set, set to "true" to generate the solution set
+\def\issolution{false}
+
+\newcounter{taskcounter}
+\newcounter{taskPercentCounter}
+\newcounter{taskcounterSection}
+\setcounter{taskcounter}{1}
+\setcounter{taskPercentCounter}{0}
+\setcounter{taskcounterSection}{\value{section}}
+\newcommand{\mayresettaskcounter}{\ifthenelse{\value{taskcounterSection} < \value{section}}
+{\setcounter{taskcounterSection}{\value{section}}\setcounter{taskcounter}{1}}{}}
+
+% Solution-only - uses an "input" so that it's still safe to publish the problem set file
+\definecolor{solutioncolor}{rgb}{0.0, 0.0, 0.5}
+\newcommand{\solution}[1]
+  {\ifthenelse{\equal{\issolution}{true}}
+  {\begin{quote}
+    \addtocounter{taskcounter}{-1}
+    \fbox{\textcolor{solutioncolor}{\bf Solution \arabic{section}.\arabic{taskcounter}}}
+    \addtocounter{taskcounter}{1}
+    \textcolor{solutioncolor}{\input{./solution/#1}}
+  \end{quote}}
+  {}}
+
+\newcommand{\qbox}{\fbox{???}}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\irl}[1]{\mathtt{#1}}
+
+
+\newcommand{\lam}{\irl{lam}}
+\newcommand{\fix}{\irl{fix}}
+\newcommand{\parr}[2]{#1 \to #2}
+\newcommand{\pair}[2]{\langle #1, #2 \rangle}
+
+\newcommand{\natt}{\irl{nat}}
+\newcommand{\prodt}[2]{#1\times#2}
+\newcommand{\voidt}{\irl{void}}
+\newcommand{\sumt}[2]{#1 + #2}
+
+\newcommand{\intro}{\text{-I}}
+\newcommand{\elim}{\text{-E}}
+
+\newcommand{\val}[1]{#1~\textsf{val}}
+\newcommand{\abst}[2]{#1.#2}
+\newcommand{\steps}[2]{#1 \mapsto #2}
+\newcommand{\subst}[3]{[#1/#2]#3}
+\newcommand{\err}[1]{#1~\textsf{err}}
+
+\newcommand{\goesto}{\hookrightarrow}
+\newcommand{\hra}{\hookrightarrow}
+
+\newcommand{\proves}{\vdash}
+\newcommand{\hasType}[2]{#1 : #2}
+\newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+\newcommand{\ctx}{\Gamma}
+\newcommand{\emptyCtx}{\emptyset}
+\newcommand{\xCtx}[2]{\ctx, \hasType{#1}{#2}}
+\newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+
+\newcommand{\valrule}{\textsf{v}}
+\newcommand{\progrule}{\textsf{s}}
+\newcommand{\elimrule}{\textsf{e}}
+
+\newcommand{\zero}{\irl{z}}
+\newcommand{\suc}[1]{\irl{s}(#1)}
+\newcommand{\rec}[5]{\irl{rec}(#1) \{\irl{z} \goesto #2 \por \suc{#3} ~\irl{with}~#4 \goesto #5\} }
+\newcommand{\iter}[4]{\irl{iter}(#1) \{\irl{z} \goesto #2 \por #3 \goesto #4\} }
+
+
+\newcommand{\bool}{\irl{bool}}
+\newcommand{\true}{\irl{true}}
+\newcommand{\false}{\irl{false}}
+\newcommand{\ifb}[3]{\irl{if}(#1;#2;#3)}
+
+\newcommand{\pred}{\irl{pred}}
+\newcommand{\sub}{\irl{sub}}
+\newcommand{\leqf}{\irl{leq}}
+
+\newcommand{\option}[1]{#1~\irl{opt}}
+\newcommand{\none}{\irl{nothing}}
+\newcommand{\some}[1]{\irl{just}(#1)}
+
+\newcommand{\extend}{\irl{extend}}
+
+\newcommand{\fn}[3]{\lambda(#1:#2)~#3}
+\newcommand{\ap}[2]{#1(#2)}
+
+\newcommand{\lprodt}[1]{\langle #1\rangle}
+\newcommand{\lsumt}[1]{[#1]}
+\newcommand{\lpair}{\pair{l_1\hra e_1}{\dots,l_n\hra e_n}}
+\newcommand{\lpairprime}{\pair{l_1\hra e_1'}{\dots,l_n\hra e_n'}}
+\newcommand{\lprodtn}{\lprodt{l_1\hra\tau_1,\dots,l_n\hra\tau_n}}
+\newcommand{\lsumtn}{\lsumt{l_1\hra\tau_1,\dots,l_n\hra\tau_n}}
+\newcommand{\lprodn}{\lprodt{l_1\hra e_1,\dots,l_n\hra e_n}}
+\newcommand{\lsumn}{\lsumt{l_1\hra e_1,\dots,l_n\hra e_n}}
+
+
+\newcommand{\proj}[2]{#1\cdot#2}
+%\newcommand{\inj}[3]{\irl{in}[#1]\{#2\}(#3)}
+\newcommand{\inj}[3]{{#2}\cdot{#3}}
+
+\newcommand{\case}[2]{\irl{case}~#1~\irl{ of }~\{#2\}}
+\newcommand{\casen}{\case{e}{\inj{}{l_1}{x_1} \hra e_1\por \dots \por \inj{}{l_n}{x_n} \hra e_n}}
+
+\newcommand{\por}{\hspace*{.2em}|\hspace*{.2em}}
+\newcommand{\letbind}[3]{\irl{let}~#1~\irl{be}~#2~\irl{in}~#3}
+\newcommand{\match}[2]{\irl{match}~#1~\{#2\}}
+\newcommand{\npat}{l_1~p_1\goesto e_1 \por \dots \por l_n~p_n\goesto e_n}
+\newcommand{\nmatch}[1]{\match{#1}{\npat}}
+\newcommand{\alias}[2]{#1~@~#2}
+\newcommand{\transJ}[4]{#1\vdash#2:#3\leadsto#4}
+\newcommand{\transJC}[3]{\transJ{\Gamma}{#1}{#2}{#3}}
+\newcommand{\matchJC}[3]{#1:#2\goesto{#3}}
+\newcommand{\matchSet}[2]{#1\implies#2}
+
+\newcommand{\defn}{\triangleq}
+
+\newcommand{\pimp}{\supset}
+
+\newcommand{\nmod}{~\mathtt{mod}~}
+\newcommand{\ndiv}{~\mathtt{div}~}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+
+\newcommand{\problemset}[1]
+  {\ifthenelse{\equal{\issolution}{true}}
+  {}{{#1}}}
+
+\setcounter{taskcounter}{1}
+\setcounter{taskPercentCounter}{0}
+\setcounter{taskcounterSection}{\value{section}}
+
+%\newcommand{\ttt}[1]{\texttt{#1}}
+
+%% part of a problem
+\newcommand{\task}[1]
+  {\bigskip \noindent {\bf Task\mayresettaskcounter{}\addtocounter{taskPercentCounter}{#1} \arabic{section}.\arabic{taskcounter}\addtocounter{taskcounter}{1}}.}
+
+\newcommand{\ectask}
+  {\bigskip \noindent {\bf Task\mayresettaskcounter{} \arabic{section}.\arabic{taskcounter}\addtocounter{taskcounter}{1}} (Extra Credit).}
+
+%% The rule counter
+\newcounter{rule}
+\setcounter{rule}{0}
+\newcommand{\rn}
+  {\addtocounter{rule}{1}(\arabic{rule})}
+
+
+\title{OPLSS 2017 PL Background Day 1}
+
+\author{Robert Harper and Dan Licata}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{quote} 
+\emph{These exercises are based on materials for Carnegie Mellon 15-312:
+  Principles of Programming Languages; we thank many intructors and
+  teaching assistants for contributing to the design and implementation
+  of these problems.}
+\end{quote}
+
+Here are some problems you can use to review the first day's materials.
+Please note that we definitely do \emph{not} expect you to finish all of
+these before tomorrow!  Students come to OPLSS with very different
+backgrounds, and our only goal is that \emph{everyone} learns
+\emph{something}.  If you haven't seen much of this material before, you
+might spend several days's hands-on sessions working on this assignment.
+If you've seen the basics before, there are more advanced problems later
+in this assignment, and more research-level courses coming up later in
+the week.
+
+The online preview of PFPL is here:
+\begin{center}
+\url{http://www.cs.cmu.edu/~rwh/pfpl/2nded.pdf}
+\end{center}
+
+
+\paragraph{Paper and pencil}
+
+\begin{enumerate}
+
+\item Problem 1: This problem asks you to write some programs in
+  G\"odel's T.
+
+\item Problem 2: This problem asks you to prove determinism and the
+  correspondence between an evaluation relation and a structural
+  operational semantics.  If you have never done proofs by rule
+  induction before, start here.
+
+\item Problem 3: This problem asks you to do some type safety (progress
+  and preservation) proofs and to learn about product and sum types.  If
+  you haven't done many proofs by rule induction, or haven't seen
+  progress and preservation before, you should start here, before doing
+  the logical relations proofs.  
+
+\item Problem 4: This problem asks you to practice some of the materials
+  from the logical relations lecture.
+\end{enumerate}
+
+\paragraph{Implementation}
+Problem 5: This problem asks you to implement a type checker and
+operational semantics for a simple functional programming language with
+labeled sums and products (see PFPL Chapters 10 and 11 specifically).
+If you haven't seen type systems and operational semantics before,
+implementing them is a good way to really understand them.  If you've
+written a type checker or an interpreter for a functional language, your
+time might be better spent on the logical relations proofs.
+
+\section{Programming in G\"odel's T}
+
+For this section, work in G\"odel's T (see PFPL Chapter 9).  
+
+\task{0} Define an addition function $\mathtt{plus} : \natt \to \natt \to \natt$.
+
+\task{0} Define a multiplication function $\mathtt{mult} : \natt \to \natt \to \natt$.
+
+\task{0} Define a factorial function $\mathtt{fact} : \natt \to \natt$.
+
+\task{0} It is possible to define G\"odel's T with either
+\emph{iteration} or \emph{recursion}.  The difference is
+
+\[
+\inferrule{
+\typeJC{e}{\natt}\\
+\typeJC{e_z}{\tau}\\
+\typeJ{\ctx, \hasType{x}{\natt},\hasType{y}{\tau}}{e_1}{\tau}
+}{
+\typeJC{\rec{e}{e_z}{x}{y}{e_1}}{\tau}
+}
+\qquad
+\inferrule{
+\typeJC{e}{\natt}\\
+\typeJC{e_z}{\tau}\\
+\typeJ{\ctx,\hasType{y}{\tau}}{e_1}{\tau}
+}{
+\typeJC{\iter{e}{e_z}{y}{e_1}}{\tau}
+}
+\]
+
+That is, in ``iteration'', the successor case does not bind a variable
+standing for the predecessor of the number, only for the recursive call,
+while in ``recursion,'' it does bind a variable standing for the
+predecessor.  Iteration is clearly a special case of recursion,  where
+the variable goes unused.
+
+Perhaps surprisingly, it is also possible to show that conversely,
+recursion can be defined from iteration.  Show how to code recursion
+using iteration in G\"odel's T \emph{with product types} (do the next
+problem first if you don't know how those work): define the recursor and
+show that the instruction steps for executing the recursor on $\zero$
+and $\suc{n}$ are simulated by one or more instruction steps in the
+language with iteration.
+
+\section{Rule Induction Warm-Up}
+
+For this problem, again consider G\"odel's T as described in PFPL
+Chapter 9, i.e. a language with function types $\to$ and natural
+numbers.
+
+\paragraph{Determinism of Stepping}
+
+\task{0} Prove that stepping is deterministic:
+\begin{quote}
+For all $e$, if $e \mapsto v$ and $e \mapsto v'$ then $v =_\alpha v'$
+($v$ and $v'$ are equal values, where equal means $\alpha$-equivalent).
+\end{quote}
+
+\paragraph{Determinism of Multi-step Evaluation}
+
+Define multi-step evaluation as the \emph{reflexive-transitive closure}
+of evaluation:
+\[
+\inferrule{ }
+          {e \mapsto e}
+\qquad
+\inferrule{e \mapsto e' \\
+           e' \mapsto^* e''}
+          {e \mapsto^* e''}
+\]
+
+\task{0} Prove that multi-stepping is deterministic:
+\begin{quote}
+For all $e$, if $e \mapsto^* v$ and $e \mapsto^* v'$ then $v =_\alpha
+v'$ ($v$ and $v'$ are equal values, where equal means $\alpha$-equivalent).
+\end{quote}
+
+\paragraph{Relating SOS and Evaluation}
+
+One way to define ``evaluating a program all the way to a value'' is
+defining structural operational semantics $e \mapsto e'$, and then
+defining multistep evaluation as $e \mapsto^* e'$.  Another is to
+directly define an \emph{evaluation relation} $e \Downarrow v$.  For
+example, for call-by-name we have the following rules for $\to$:
+\[
+\inferrule{  }
+          { (\lambda x:\tau.e) \Downarrow (\lambda x:\tau.e) }
+\qquad
+\inferrule{ e_1 \Downarrow (\lambda x:\tau.e) \\
+            e[e_2/x] \Downarrow v \\
+          }
+          { (e_1 \, e_2) \Downarrow v }
+\]
+
+\task{0} Prove that the evaluation relation and multi-step SOS correspond:
+\begin{quote}
+$e \Downarrow v$ iff $e \mapsto^* v$
+\end{quote}
+
+You will need some lemmas; if you get stuck, see PFPL Section 7.2 for a
+hint.
+
+\section{Progress and Preservation}
+
+If you haven't seen progress and preservation proofs before, first read
+the proof for functions and application in PFPL section 8.2.    
+
+\paragraph{Natural Numbers}
+
+\task{0} Prove progress and preservation for the natural numbers in
+G\"odel's T, i.e. do the cases of progress and preservation for $0$,
+successor, and the recursor (recursion).
+
+\paragraph{Products}
+
+Read PFPL Section 10.1, and then and prove Theorem 10.1, progress and
+preservation for a language with pair types $\tau_1 \times \tau_2$.
+
+\task{0}
+Prove preservation, that is:
+ \begin{quote}
+ If $\typeJ{\cdot}{e}{\tau}$ and $\steps{e}{e'}$ then $\typeJ{\cdot}{e'}{\tau}$.
+ \end{quote}
+
+ \task{0} Prove progress. That is:
+ \begin{quote}
+ If $\typeJ{\cdot}{e}{\tau}$ then either $\val{e}$ or there is some $e'$ such that $\steps{e}{e'}$.
+ \end{quote}
+
+\paragraph{Sums}
+
+\task{0} Read PFPL Section 11.1 and prove Theorem 11.1, progress and
+preservation for the sum type $\tau_1 + \tau_2$.  
+
+\section{Logical Relations}
+
+\newcommand\logrel[2]{\ensuremath{\mathsf{Good}_{#1}(#2)}}
+
+In lecture, we defined a logical relation and used it to prove
+termination.  The relation \logrel{\tau}{e} is a predicate on closed
+terms $\typeJ{\cdot}{e}{\tau}$, and is defined by induction on $\tau$ as
+
+\begin{itemize}
+\item $\logrel{\irl{int}}{e}$ iff there exists a number $k$ such that $e
+  \mapsto^* \mathsf{num}[k]$
+
+\item $\logrel{\tau_2 \to \tau}{f}$ iff 
+  there exists a term $x : \tau_2 \vdash e : \tau$ 
+  such that (1) $f \mapsto^* (\lambda x.e)$
+  and (2) for all $\typeJ{\cdot}{e_2}{\tau_2}$, $\logrel{\tau_2}{e_2}$ implies
+  $\logrel{\tau}{e[e_2/x]}$.
+\end{itemize}
+
+A substitution $\typeJ{\cdot}{\theta}{\Gamma}$ is a list
+$(e_1/x_1,\ldots e_n/x_n)$ where $\typeJ{\cdot}{e_i}{\tau_i}$ for each
+variable $x_i:\tau_i$ in $\Gamma$.  We write $e[\theta]$ for performing
+the substitution $\theta$, plugging in for all of the variables in $e$.
+For a substitution $\typeJ{\cdot}{\theta}{\Gamma}$, we say
+$\logrel{\Gamma}{\theta}$ iff $\logrel{\tau}{\theta(x)}$ for all
+$x:\tau$ in $\Gamma$.
+
+The fundamental theorem says that well-typed terms preserve goodness:
+\begin{quote}
+If $\typeJ{\Gamma}{e}{\tau}$ and $\logrel{\Gamma}{\theta}$ then
+$\logrel{\tau}{e[\theta]}$.  
+\end{quote}
+
+\task{0} Extend the languages with binary pairs as in PFPL Section 10.1
+with a lazy operational semantics.  This means that $\langle e_1, e_2
+\rangle$ is always a value, and does not evaluate $e_1$ and $e_2$ until
+a projection is taken.  Check that closure under converse evaluation
+still holds, and do the cases of the fundamental theorem for pairing and
+projections.
+
+\task{0} Extend the definition of the logical relation to sum types
+$\tau_1 + \tau_2$, again with a lazy operational semantics (so both
+$\mathsf{inl}(e)$ and $\mathsf{inr}(e)$ are values regardless of whether
+$e$ is).  Check that closure under converse evaluation still holds, and
+do the cases of the fundamental theorem for injections and case
+analysis.
+
+\task{0} Replace the base type $\irl{int}$ with natural numbers as in
+System T (again with a lazy successor, so $\suc{e}$ is always a value).
+Define the logical relation for $\natt$ by an inner or ``horizontal''
+induction:
+
+\[
+\infer{\logrel{\natt}{e}}
+      {e \mapsto^* \zero}
+\qquad
+\infer{\logrel{\natt}{e}}
+      {e \mapsto^* \suc{e_0} & 
+        \logrel{\natt}{e_0}
+      }
+\]
+
+You will need to do an inner induction on ${\logrel{\natt}{e}}$ to
+prove the case of the fundamental theorem for the recursor.    
+
+\task{0} Adapt all of the above to call-by-value/eager instead of
+call-by-name/lazy. What changes in the proofs?
+
+%% Note that some of these exercises are solved in PFPL Chapter 46, so look
+%% there if you get stuck.
+
+\section{Implementing System T with Labeled Sums and Products}
+
+For this section of the assignment, we will be working on System T
+extended with labeled sum and product types.  The abstract syntax is as
+follows; on the left is the formal abstract binding tree notation, and
+on the right is a more reader-friendly display notation, which should be
+thought of as synonyms for the left-hand column.  
+
+\[
+\begin{array}{r c c l l l}
+\ms{Type} & \tau & ::=
+			&\irl{nat}                	 				& \irl{nat} 													& \text{naturals}\\
+         &	&	&\irl{arr}(\tau_1;\tau_2) 				& \parr{\tau_1}{\tau_2} 										& \text{function}\\
+         & 	&	&\irl{prod}(l_1\hra\tau_1;\dots;l_n\hra\tau_n)		& \lprodtn											& \text{product}\\
+      	 & 	&	&\irl{sum}(l_1\hra\tau_1;\dots;l_n\hra\tau_n)		& \lsumtn											& \text{sum}\\
+	 \\
+\ms{Exp}
+        & e   & ::= 	& x                                				& x 														& \text{variable}\\
+        &	&	& \zero							& \zero													& \text{zero}\\
+        &      &      	& \suc{e}                     				& \suc{e}													& \text{successor} \\
+        &      &      	& \irl{rec}\{e_z;x.y.e_1\}(e)   			& \rec{e}{e_z}{x}{y}{e_1}										& \text{recursion}\\
+        &      &      	& \lam\{\tau\}(x.e)           				& \fn{x}{\tau}{e}												& \text{abstraction} \\
+        &      &     	& \irl{ap}(e_1;e_2) 					& \ap{e_1}{e_2} 											& \text{application}\\
+        &      &	& \irl{tuple}(l_1\hra e_1;\dots;l_n\hra e_n) 	& \lpair													& \text{tuple}\\
+ 	&	&	& \irl{proj}[l](e)						& \proj{e}{l}												& \text{projection}\\
+	&	&	& \irl{in}[l]\{\tau\}(e)					& \inj{\tau}{l}{e}												& \text{injection}\\
+	&	&	& \irl{case}[l_1,\dots,l_n](x_1.e_1;\dots;x_n.e_n)(e) 	& \casen											& \text{casing}\\
+\end{array}
+\]
+Labels, represented by $l$ in the grammar, are simply identifiers
+associated with elements of tuples and sums to give them some
+description and allow for a more intuitive elimination form.
+
+The types of this language are natural numbers and function types,
+together with labeled products and and labeled sums.  
+
+A labeled product is a \emph{record} with named fields.  To create a
+record, you give a value for each field.  To use a record, you project a
+specified field.  Records are included in some form or another in most
+functional languages (e.g. ML, Haskell).  Records are somewhat analogous
+to the fields of an object in object-oriented programming languages;
+additionally, many languages have a notion of a function with named
+arguments, which can be modeled by a function that takes a record as an
+argument.
+
+More formally, the type $\lprodtn$ is a labeled product type whose
+component labeled $l_i$ has type $\tau_i$.  The introduction form for
+labeled products has the form $\lprodn$ whose $l_i$ component is $e_i$.
+The projection $\proj{e}{l}$ selects the $l$ component of the labeled
+tuple $e$.
+\begin{mathpar}
+\small
+\inferrule{
+	\typeJC{e_1}{\tau_1}~\dots~\typeJC{e_n}{\tau_n}\\
+	\forall i\neq j.l_i\neq l_j
+}{
+	\typeJC{\lpair}{\lprodtn}
+}(\prodt{}\intro)
+
+\inferrule{
+	\typeJC{e}{\lprodtn}\\
+	(1\leq i\leq n)
+}{
+	\typeJC{\proj{e}{l_i}}{\tau_i}
+}(\prodt{}\elim)
+
+\inferrule{
+	\val{e_1}~\dots~\val{e_n}
+}{
+	\val{\lprodn}
+}(\irl{tuple}_\valrule)
+\quad
+\inferrule{
+	\val{e_1}\dots \val{e_{i-1}}\\
+	\steps{e_i}{e_i'}\\
+}{
+	\steps{\lprodn}{\lprodt{l_1\hra e_1,\dots,l_i\hra e_i',\dots,l_n\hra e_n} }
+}(\irl{tuple}_\progrule)
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{e.l_i\{\tau\}}{e'.l_i\{\tau\}}
+}(\irl{proj}_\progrule^1)
+\qquad
+\inferrule{
+	\val \lpair
+}{
+	\steps{\proj{\lprodn}{l_i}}{e_i}
+}(\irl{proj}_\progrule^2)
+
+\end{mathpar}
+
+Dually, a labeled sum type is a like a non-recursive datatype in ML or
+Haskell.  To make a value of this type, you choose a label and supply
+the appropriate payload data.  To use a value of this type, you
+case-analyze the possible ways it could have been constructed.  The type
+$\lsumtn$ is the labeled sum type whose elements are elements of type
+$\tau_i$ labeled with $l_i$, for some $1\leq i\leq n$. The injection
+$\irl{inj}\{\tau\}(l;e)$ creates a sum of type $\tau$ with $e$ at label
+$l$. $\casen$ takes a sum and if it is of form $l_i$, binds the contents
+to $x_i$ in $e_i$.
+\begin{mathpar}
+\small
+\inferrule{
+	\typeJC{e}{\tau_i}\\
+	\forall i\neq j.l_i\neq l_j
+}{
+	\typeJC{\inj{}{l_i}{e}}{\lsumtn}
+} (\sumt{} \intro)
+
+\inferrule{
+	\typeJC{e}{\lsumtn}\\
+	\typeJ{\Gamma,\hasType{x_i}{\tau_i}}{e_i}{\tau}
+	~\dots~
+	\typeJ{\Gamma,\hasType{x_i}{\tau_i}}{e_i}{\tau}
+}{
+	\typeJC{\casen}{\tau}
+}(\sumt{} \elim)
+
+\inferrule{
+	\val{e}
+}{
+	\val{\inj{\tau}{l}{e}}
+}(\irl{inj}_\valrule)
+\quad
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{\inj{\tau}{l}{e}}{\inj{\tau}{l}{e'}}
+}(\irl{inj}_\progrule)
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{\case{e}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}{\case{e'}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}
+}(\irl{case}_\progrule^1)
+
+\inferrule{
+	\val{\inj{}{l_i}{e}}
+}{
+	\steps{\case{\inj{\tau}{l_i}{e}}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}
+		 {[e/x_i]e_i}
+}(\irl{case}_\progrule^2)
+
+\end{mathpar}
+
+Your goal in this section will be to implement the static and dynamic
+semantics of System T with labeled sums and products.  The full rules
+are included in Section~\ref{sec:full} for your reference.
+
+You are welcome to do this in any language if you want to start from
+scratch.  However, if you use Standard ML, we have provided a lot of
+definitions and scaffolding that you will find useful.  
+
+\paragraph{Data Structures} The directory \texttt{cmlib} contains a general SML library.
+You may want to use some operations from the signatures in
+\texttt{dict.sig} and \texttt{set.sig} for dictionaries and sets.
+
+\paragraph{Names}  One common issue in implementing programming
+languages is representing names/variables/identifiers in such a way that
+you can check $\alpha$-equivalence of syntax trees and correctly
+implement (capture-avoiding) substitution.
+
+In the \texttt{var} subdirectory, we have provided an abstract type of
+of "temp"oraries/names, which are used to implement variables and
+labels.  The file \texttt{var/temp.sig} describes the operations on
+names.  Key operations include:
+
+\begin{code}
+signature TEMP =
+sig
+  type t
+
+  (* Creates a new, globally unique temp. *)
+  val new : string -> t
+
+  (* Tests whether two temps are equal. *)
+  val equal  : (t * t) -> bool
+
+  ...
+end
+\end{code}
+
+The type \texttt{t} is an abstract/private/unknown type with the
+operations provided in the rest of the signature.  The operation
+\texttt{new} creates a new \emph{globally unique} name (i.e. every time
+you call \texttt{new}, you are guaranteed that the name provided will be
+different than any other name that already exists).  Though it is not
+necessary (e.g. you could just as well always call \verb|new ""|,
+because each new name is different), for readability, \texttt{new} takes
+a string that is used when the name is printed out.  Names can be
+compared for equality using the \texttt{equal} function.
+
+In your implementation, the modules Label and Variable have signature
+\texttt{TEMP}.
+
+\paragraph{Abstract binding trees}  Next, we have implemented the
+syntax of types and terms; see \sml{labT/labt.sig} for the interface.  
+
+As a first cut, you might expect that we would represent terms with a datatype
+like
+\begin{code}
+    datatype term
+      = Var of termVar
+      | Lam of (termVar * Typ.t) * term
+      | Ap of term * term
+\end{code}
+where \texttt{termVar} is a type of names as described above.  This says
+that a \texttt{Lam} term has a variable, a type ascription for the
+variable, and another term standing for the body of the function; an
+application has two subterms, for the function and the argument.  A
+problem with this representation is that, as you traverse a term, you
+need to remember to substitute fresh variables at appropriate times to
+avoid accidental problems with $\alpha$-equivalence and substitution,
+because the same \texttt{termVar} might be used in many places with
+different meanings.
+
+Instead, we will use an abstract type to hide all of this variable
+manipulation in the implementation of terms.  Here is the signature:
+
+\begin{verbatim}
+  structure Term : sig
+    type termVar = Variable.t
+    type term
+
+    datatype view
+      = Var of termVar
+      | Z
+      | S of term
+      | Lam of (termVar * Typ.t) * term
+      | Ap of term * term
+      | Pair of (Label.t * term) list
+      | Proj of term * Label.t
+      | Inj of Typ.t * Label.t * term
+      | Case of term * ((Label.t * termVar) * term) list
+      | Iter of term * term * (termVar * (termVar * term))
+
+    val into : view -> term
+    val out : term -> view
+
+    val aequiv : term * term -> bool
+    val subst : term -> termVar -> term -> term
+
+    ... 
+
+  end
+\end{verbatim}
+
+The type \sml{term} is abstract, while the type \sml{view} is a datatype
+like above---but not that the subtrees are abstract \sml{term}s, not
+recursive occurences of \sml{view}.  There are functions \sml{into} and
+\sml{out} that map between these, so to \emph{create} a term, you can
+call \sml{into} on a \sml{view}, while to case-analyze a term (as you
+will do in your type checker and operational semantics), you call
+\sml{out}.  The key idea is:
+\begin{quote}
+\emph{whenever \sml{out} exposes a \sml{termVar} in the view (e.g. in a
+  \sml{Lam} or \sml{Case} or \sml{Iter}), that variable is \emph{fresh}
+  (distinct from all other variables in play)}
+\end{quote}
+Therefore, in your code, you can assume all variables are
+fresh/distinct, which simplifies the implementation.  
+
+For conveneince, the \sml{Term} module also provides functions named
+\sml{Var'} and \sml{Z'} and \sml{S'} and \sml{Lam'} \ldots, where
+\sml{C'} abbreviates \sml{into(C ...)} for the corresponding view
+constructor.
+
+The \sml{Term} module also provides implementations of
+$\alpha$-equivalence and substitution for your convenience.  
+
+\paragraph{Your code}
+
+Your code will go in the \sml{sem} directory, in \sml{typechecker.sml}
+and \sml{dynamics.sml}, which implement the signatures in the
+corresponding \sml{.sig} files.  
+
+\task{0} Implement the statics of the language. You will need to
+implement the module \verb|TypeChecker|, which can be found in
+``\verb|sem/typechecker.sml|''.
+
+Hints:
+\begin{itemize}
+\item Use the structure \sml{Context} for dictionaries mapping term
+  variables to types.
+
+\item Your main goal is to implement the function \sml{checkType},
+which takes a context and a term and \emph{synthesizes} a type if the
+expression is well-typed.  If the expression is ill-typed, the function
+should raise the exception \sml{TypeError}.  
+
+\item The helper function \sml{equiv e t1 t2} checks if the types
+  \sml{t1} and \sml{t2} are equal. If so, it returns \sml{()}, the one
+  value of the \sml{unit} type, and if not, it raises a \sml{TypeError}
+  signalling that there was a problem type checking \sml{e} (which is
+  provided only for error reporting).  A common SML idiom is 
+\begin{verbatim}
+let val () = equiv e t1 t2 
+ in rest
+ end 
+\end{verbatim}
+which signals that \sml{equiv e t1 t2} is being run only for its
+computational effect of possibly raising an exception, and when it
+succeeds, we run \sml{rest}.  This can also be written
+\begin{verbatim}
+equiv e t1 t2; rest
+\end{verbatim}
+
+\item Your type checker should ensure that all types occuring in type
+  checking are well-formed, which in this case means only that the
+  labeled sums and products have no duplicate labels.  
+
+\end{itemize}
+
+\task{0} Implement the dynamics of the language. You will need to
+implement the module \verb|LabTDynamics|, which can be found in
+``\verb|sem/dynamics.sml|''. 
+
+ Your overall goal is to implement the function
+\begin{code}
+  datatype d = STEP of Term.term | VAL
+  val trystep : Term.term -> d
+\end{code}
+(the rest of the module is implemented for you).  This should satisfy
+the following specification:
+\begin{quote}
+If \sml{e} is a closed, well-typed term, then \sml{trystep e} returns
+\sml{STEP e'} if $\sml{e} \mapsto \sml{e'}$, or \sml{VAL} if \sml{e} is
+a value.
+\end{quote}
+
+Hints:
+\begin{itemize}
+\item \sml{trystep} is an \emph{implementation of the progress proof for
+  the language}.  If you get stuck on how to proceed, try doing the
+  corresponding case of the proof.
+
+\item Ignore the exceptions \sml{RuntimeError} and \sml{Abort} and the
+  type \sml{D}, which are not used here (they are for other uses of this
+  support code).
+
+\item Because we are \emph{assuming} and \sml{e} is well-typed (i.e. we
+  run the type checker before running the operational semantics), your
+  implementation can do anything it wants if it encounters an ill-typed
+  term---there is no need to specifically test for such cases and report
+  them. However, we have provided an exception \sml{Malformed} that
+  could be used in cases where you do discover that the term is
+  ill-typed.
+\end{itemize}
+
+\paragraph{Testing}
+
+To compile your program, start \sml{sml} from the handout directory and
+then do
+\begin{verbatim}
+- CM.make "sources.cm";
+\end{verbatim}
+
+Our support code provides a \emph{read-typecheck-eval-print-loop} (REPL)
+that you can use to test interactively.  To start it, run
+\begin{verbatim}
+- TopLevel.repl()
+\end{verbatim}
+
+The REPL keeps tract of a current expression that you are working.
+There are three commands that you can use
+\begin{itemize}
+\item \sml{load e;}.  Type checks the expression \sml{e} and sets it as
+  the current expression to be evaluated.  
+\item \sml{step;} steps the current expression one step, and reports the
+  new expression or if the current expression is a value.  
+\item \sml{eval;} evaluates the current expression all the way to a
+  value.  
+\end{itemize}
+The commands \sml{step} and \sml{eval} can also be called with an
+expression argument, which is like running \sml{load e} before them.
+
+Here are some examples that show the concrete syntax (more examples are
+in the \sml{tests} directory):
+
+\begin{enumerate}
+\item 
+\begin{verbatim}
+->load s(z);
+Statics: term has type Nat
+ |--> (S Z)
+->step;
+ (S Z) VAL
+->step;
+Error: Nothing to step!
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+->eval fn (x:nat) x;
+Statics: term has type (Arrow (Nat, Nat))
+Statics: term has type (Arrow (Nat, Nat))
+ (Lam ((x@13, Nat) . x@13)) VAL
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+->load (fn (x:nat) x) z;
+Statics: term has type Nat
+ |--> (Ap ((Lam ((x@18, Nat) . x@18)), Z))
+->step;
+Statics: term has type Nat
+ |--> Z
+->step;
+ Z VAL
+\end{verbatim}
+
+\item Type errors should be reported:   
+\begin{verbatim}
+->load s(fn (x:nat) x);
+LabTChecker error in term: (S (Lam ((x@38, Nat) . x@38)))
+\end{verbatim}
+
+\item $\rec{e}{e_0}{x}{p}{e_1}$ is written \sml{iter e \{ e0 | s(x) with p => e1\}}.  
+\begin{verbatim}
+->eval (fn (x:nat) iter x { z | s(y) with p => s(s(p))}) (s(s(z)));
+Statics: term has type Nat
+Statics: term has type Nat
+ (S (S (S (S Z)))) VAL
+\end{verbatim}
+
+\item Record values are written \sml{< l1 = e1 , ... , ln = en>}.  
+
+\begin{verbatim}
+->eval <bar = z, foo = s(z)>.foo;
+Statics: term has type Nat
+Statics: term has type Nat
+ (S Z) VAL
+\end{verbatim}
+
+\item Because types are inferred, sum injections must be annotated with
+  all of the constructors (a better type checker would infer these).
+  For example, what we would write as $\inj{}{\mathsf{SOME}}{e}$ in the
+  labeled sum type 
+  \[
+  \lsumt{\mathsf{NONE} \hra \langle\rangle, \mathsf{SOME} \hra \natt}
+  \]
+  is written 
+\begin{verbatim}
+   in[NONE :: <>, SOME :: nat]{SOME}(z)
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+->eval case (in[NONE :: <>, SOME :: nat]{SOME}(z))
+=>          {NONE m => z | SOME w => s(z)};
+Statics: term has type Nat
+Statics: term has type Nat
+ (S Z) VAL
+\end{verbatim}
+\end{enumerate}
+
+You can also run an example from a file using \sml{TopLevel.evalFile
+  filename}, and there is an automated testing harness in
+\verb|tests.sml|.  
+
+
+\section{Appendix: Full Rules for G\"odel's T with labeled products and sums}
+
+\label{sec:full}
+
+\subsection{Statics}
+
+\subsubsection{System T}\label{tstatics}
+\begin{mathpar}
+\small
+\inferrule{
+ }{\typeJ{\Gamma,x:\tau}{x}{\tau}} (\text{var})
+
+\inferrule{ }{\typeJC{\zero}{\natt}} (\natt\intro_1)
+\qquad
+\inferrule{
+\typeJC{e}{\natt}
+}{
+\typeJC{\suc{e}}{\natt}
+} (\natt\intro_2)
+\qquad
+\inferrule{
+\typeJC{e}{\natt}\\
+\typeJC{e_z}{\tau}\\
+\typeJ{\ctx, \hasType{x}{\natt},\hasType{y}{\tau}}{e_1}{\tau}
+}{
+\typeJC{\rec{e}{e_z}{x}{y}{e_1}}{\tau}
+} (\irl{rec})
+
+\inferrule{
+\typeJ{\ctx, \hasType{x}{\tau_1}}{e}{\tau_2}
+}{
+\typeJC{\lam\{\tau_1\}(x.e)}{\parr{\tau_1}{\tau_2}}
+} (\parr{}{}\intro)
+\qquad
+\inferrule{
+\typeJC{e_1}{\parr{\tau_1}{\tau_2}}\\
+\typeJC{e_2}{\tau_1}
+}{
+\typeJC{\ap{e_1}{e_2}}{\tau_2}
+} (\parr{}{}\elim)
+
+\end{mathpar}
+
+\subsubsection{Labeled Sums and Products}\label{prodstatics}
+\begin{mathpar}
+\small
+\inferrule{
+	\typeJC{e_1}{\tau_1}~\dots~\typeJC{e_n}{\tau_n}\\
+	\forall i\neq j.l_i\neq l_j
+}{
+	\typeJC{\lpair}{\lprodtn}
+}(\prodt{}\intro)
+\qquad
+\inferrule{
+	\typeJC{e}{\lprodtn}\\
+	(1\leq i\leq n)
+}{
+	\typeJC{\proj{e}{l_i}}{\tau_i}
+}(\prodt{}\elim)
+
+\inferrule{
+	\typeJC{e}{\tau_i}\\
+	\forall i\neq j.l_i\neq l_j
+}{
+	\typeJC{\inj{}{l_i}{e}}{\lsumtn}
+} (\sumt{} \intro)
+
+\inferrule{
+	\typeJC{e}{\lsumtn}\\
+	\typeJ{\Gamma,\hasType{x_i}{\tau_i}}{e_i}{\tau}
+	~\dots~
+	\typeJ{\Gamma,\hasType{x_i}{\tau_i}}{e_i}{\tau}
+}{
+	\typeJC{\casen}{\tau}
+}(\sumt{} \elim)
+
+\end{mathpar}
+
+\subsection{Dynamics (Eager, Left-to-Right)}\label{dynamics}
+
+\subsubsection{System T}\label{tdynamics}
+\begin{mathpar}
+\small
+\inferrule{ }{\val{\zero}} (\natt_\valrule^1)
+
+\inferrule{
+  \val{e}
+}{
+  \val{\suc{e}}
+} (\natt_\valrule^2)
+
+\inferrule{ }{\val{\lam[\tau](x.e)}} (\parr{}{}_\valrule)
+
+\inferrule{
+   \steps{e}{e'}
+}{
+   \steps{\suc{e}}{\suc{e'}}
+} (\natt_\progrule)
+
+\inferrule{
+   \steps{e_1}{e_1'}
+}{
+   \steps{e_1~e_2}{e_1'~e_2}
+} (\text{ap}_\progrule^1)
+
+\inferrule{
+  \val{e_1}\\
+  \steps{e_2}{e_2'}
+}{
+   \steps{e_1~e_2}{e_1~e_2'}
+} (\text{ap}_\progrule^2)
+
+\inferrule{\val{e_2}}
+{
+\steps{\lam[\tau](x.e)~e_2}{[e_2/x]e}
+} (\text{ap}_\elimrule)
+
+\inferrule{\steps{e}{e'}}{\rec{e_z}{x}{y}{e_1}{e}}(\irl{rec}_\progrule^1)
+
+\inferrule{ }{\steps{\rec{e_z}{x}{y}{e_1}{z}}{e_z}}(\zero)(\irl{rec}_\progrule^2)
+
+\inferrule{ \val{e}}{\steps{\rec{e_z}{x}{y}{e_1}{\suc e}}{[e,\rec{e_z}{x}{y}{e_1}{e}/x,y]e_1}}(\irl{rec}_\progrule^3)
+\end{mathpar}
+
+\subsubsection{Labeled Products and Sums}\label{proddynamics}
+\begin{mathpar}
+\small
+
+\inferrule{
+	\val{e}
+}{
+	\val{\inj{\tau}{l}{e}}
+}(\irl{inj}_\valrule)
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{\inj{\tau}{l}{e}}{\inj{\tau}{l}{e'}}
+}(\irl{inj}_\progrule)
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{\case{e}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}{\case{e'}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}
+}(\irl{case}_\progrule^1)
+\\
+
+\inferrule{
+	\val{\inj{}{l_i}{e}}
+}{
+	\steps{\case{\inj{\tau}{l_i}{e}}{l_1(x_1) \goesto e_1 \por \dots \por l_n(x_n)\goesto e_n}}
+		 {[e/x_i]e_i}
+}(\irl{case}_\progrule^2)
+
+\\
+
+\inferrule{
+	\val{e_1}~\dots~\val{e_n}
+}{
+	\val{\lprodn}
+}(\irl{tuple}_\valrule)
+\qquad
+\inferrule{
+	\val{e_1}\dots \val{e_{i-1}}\\
+	\steps{e_i}{e_i'}\\
+}{
+	\steps{\lprodn}{\lprodt{l_1\hra e_1,\dots,l_i\hra e_i',\dots,l_n\hra e_n} }
+}(\irl{tuple}_\progrule)
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{e.l_i\{\tau\}}{e'.l_i\{\tau\}}
+}(\irl{proj}_\progrule^1)
+\qquad
+\inferrule{
+	\val \lpair
+}{
+	\steps{\proj{\lprodn}{l_i}}{e_i}
+}(\irl{proj}_\progrule^2)
+
+\end{mathpar}
+
+\end{document}

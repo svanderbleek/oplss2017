@@ -1,0 +1,21 @@
+Group is
+   (* Include libraries *)
+   cmlib/cmlib.cm
+   parser/parser.cm
+   labT/abt.cm
+   var/var.cm
+   bind/bind.cm
+
+   (* Most of the implementation goes here *)
+   sem/typechecker.sig
+   sem/typechecker.sml
+   sem/dynamics.sig
+   sem/dynamics.sml
+
+   (* top level *)
+   top/top.cm
+   top.sml
+
+   (* You can add more testing code here *)
+   tests.sig
+   tests.sml
